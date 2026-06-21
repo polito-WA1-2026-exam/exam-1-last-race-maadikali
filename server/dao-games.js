@@ -52,19 +52,6 @@ export const insertGameSegment = (gameId, step, fromId, toId, eventId, coinsAfte
 };
 
 // Queries for the UI 
-export const listUserGames = (userId) => {
-  return new Promise((resolve, reject) => {
-    const sql = `SELECT g.id, g.score, g.status, g.created_at,
-                        s1.name AS start_name, s2.name AS end_name
-                 FROM games g
-                 JOIN stations s1 ON s1.id = g.start_station_id
-                 JOIN stations s2 ON s2.id = g.end_station_id
-                 WHERE g.user_id = ?
-                 ORDER BY g.created_at DESC, g.id DESC`;
-    db.all(sql, [userId], (err, rows) => (err ? reject(err) : resolve(rows)));
-  });
-};
-
 export const getRanking = () => {
   return new Promise((resolve, reject) => {
     const sql = `SELECT u.username, MAX(g.score) AS best_score, COUNT(g.id) AS games_played

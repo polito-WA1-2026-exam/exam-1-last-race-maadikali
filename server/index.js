@@ -8,7 +8,7 @@ import passport, { isLoggedIn } from "./auth.js";
 import { listStations, listLines, listLineStations, listEvents } from "./dao-network.js";
 import {
   createActiveGame, getActiveGame, deleteActiveGame,
-  insertGame, insertGameSegment, listUserGames, getRanking,
+  insertGame, insertGameSegment, getRanking,
 } from "./dao-games.js";
 import { buildGraph, pickEndpoints, validateRoute } from "./network.js";
 
@@ -241,16 +241,6 @@ app.post(
     }
   }
 );
-
-// GET /api/games/mine  — the current user's games (newest first)
-app.get("/api/games/mine", isLoggedIn, async (req, res) => {
-  try {
-    const rows = await listUserGames(req.user.id);
-    res.json(rows);
-  } catch (err) {
-    res.status(500).json({ error: `Database error: ${err}` });
-  }
-});
 
 // GET /api/ranking  — best score per player, descending
 app.get("/api/ranking", isLoggedIn, async (req, res) => {
