@@ -1,4 +1,4 @@
-/** DB access module — opens the SQLite database (async sqlite3 driver). */
+// DB access module — opens the SQLite database
 
 import sqlite3 from "sqlite3";
 
