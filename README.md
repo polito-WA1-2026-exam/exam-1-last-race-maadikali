@@ -35,7 +35,7 @@
   - response body when valid: `{ valid: true, gameId, initialCoins, steps: [{ step, from, to, event, coinsAfter }], score }`; when invalid: `{ valid: false, reason, score: 0 }`
 - GET `/api/ranking`
   - no parameters (login required)
-  - response body: `[{ username, best_score, games_played }]` ordered from highest to lowest
+  - response body: `[{ username, best_score}]` ordered from highest to lowest
 
 ## Database Tables
 
