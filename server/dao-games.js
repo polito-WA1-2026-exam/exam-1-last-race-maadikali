@@ -54,7 +54,7 @@ export const insertGameSegment = (gameId, step, fromId, toId, eventId, coinsAfte
 // Queries for the UI 
 export const getRanking = () => {
   return new Promise((resolve, reject) => {
-    const sql = `SELECT u.username, MAX(g.score) AS best_score, COUNT(g.id) AS games_played
+    const sql = `SELECT u.username, MAX(g.score) AS best_score
                  FROM users u
                  JOIN games g ON g.user_id = u.id
                  GROUP BY u.id, u.username
