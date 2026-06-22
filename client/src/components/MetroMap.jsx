@@ -10,7 +10,7 @@ const COORDS = {
   'Dauir':           { x: 840, y: 340, lx: 26,  ly: 6,   anchor: 'start' },
   'Ortalyk':         { x: 720, y: 110, lx: 26,  ly: 6,   anchor: 'start' },
   'Jana Kala':       { x: 620, y: 180, lx: 26,  ly: 6,   anchor: 'start' },
-  'Syganak':         { x: 330, y: 370, lx: 0,   ly: -24, anchor: 'middle' },
+  'Syganak':         { x: 330, y: 370, lx: -21,   ly: -20, anchor: 'middle' },
   'Zhibek Zholy':    { x: 210, y: 510, lx: 0,   ly: 34,  anchor: 'middle' },
   'Alpamys':         { x: 660, y: 610, lx: 0,   ly: 34,  anchor: 'middle' },
   'Mangilik Yel':    { x: 830, y: 490, lx: 26,  ly: 6,   anchor: 'start' },
@@ -18,7 +18,7 @@ const COORDS = {
   'Nurly Olke':      { x: 970, y: 140, lx: 26,  ly: 6,   anchor: 'start' },
   'Turan':           { x: 120, y: 470, lx: 0,   ly: -22, anchor: 'middle' },
   'Esil Plaza':      { x: 220, y: 400, lx: -22, ly: 6,   anchor: 'end' },
-  'Galamat Sayabak': { x: 570, y: 390, lx: 0,   ly: -22, anchor: 'middle' },
+  'Galamat Sayabak': { x: 570, y: 390, lx: 0,   ly: 32, anchor: 'middle' },
 };
 
 export default function MetroMap({ network, showLines = true, highlightStart = null, highlightEnd = null, compact = false }) {
