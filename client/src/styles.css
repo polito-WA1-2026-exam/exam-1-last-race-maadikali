@@ -1,0 +1,123 @@
+/* Last Race - light theme (warm white, green accents, plain system font) */
+
+:root {
+  --bg: #f4f5f7;          /* cool light grey */
+  --surface: #ffffff;     /* cards */
+  --surface-2: #eceef1;   /* hover / insets */
+  --line: #d9dce1;        /* borders */
+
+  --text: #1f2421;        /* near-black body text */
+  --text-2: #555b54;      /* secondary text */
+  --muted: #8a8f87;       /* labels */
+
+  --green: #1f6b3b;       /* main accent (dark green) */
+  --green-dark: #174f2c;
+  --green-soft: #e4efe7;  /* light green background */
+  --good: #1f8a4c;
+  --bad: #b3261e;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+h1, h2, h3, h4, h5 { color: var(--text); font-weight: 700; }
+.text-muted { color: var(--muted) !important; }
+a { color: var(--green); text-decoration: none; }
+a:hover { color: var(--green-dark); }
+hr { border-color: var(--line); }
+
+/* navbar */
+.navbar { background: var(--surface) !important; border-bottom: 1px solid var(--line); }
+.navbar .nav-link { color: var(--text-2) !important; font-weight: 600; }
+.navbar .nav-link:hover { color: var(--text) !important; }
+.navbar .nav-link.active { color: var(--green) !important; }
+.lr-wordmark { font-weight: 800; letter-spacing: 0.04em; font-size: 1.1rem; color: var(--text); }
+
+/* cards */
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px !important; color: var(--text); box-shadow: none; }
+.card .card-title { color: var(--text); }
+
+/* buttons */
+.btn { border-radius: 6px; font-weight: 600; }
+.btn-primary { background: var(--green); border-color: var(--green); color: #fff; }
+.btn-primary:hover, .btn-primary:focus { background: var(--green-dark); border-color: var(--green-dark); color: #fff; }
+.btn-success { background: var(--good); border-color: var(--good); color: #fff; }
+.btn-success:hover { background: #186b3b; border-color: #186b3b; }
+.btn-outline-light, .btn-outline-secondary { background: transparent; border: 1px solid var(--line); color: var(--text-2); }
+.btn-outline-light:hover, .btn-outline-secondary:hover { background: var(--surface-2); color: var(--text); }
+.btn-outline-danger { color: var(--bad); border: 1px solid #e3b5b2; }
+.btn-outline-danger:hover { background: #f7e8e7; color: var(--bad); }
+.btn-link { color: var(--green); }
+
+/* forms */
+.form-control { background: #fff; border: 1px solid var(--line); color: var(--text); border-radius: 6px; }
+.form-control:focus { border-color: var(--green); box-shadow: 0 0 0 2px var(--green-soft); }
+.form-label { color: var(--text); font-weight: 600; }
+
+/* hero */
+.lr-hero-title { font-weight: 800; font-size: 2.4rem; color: var(--text); margin: 0; }
+.lr-grad-text { color: var(--green); }
+
+/* phase label */
+.lr-phase { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0; }
+
+/* instructions list (anonymous) */
+.lr-instructions { line-height: 1.6; color: var(--text-2); font-size: 0.95rem; padding-left: 1.2rem; }
+.lr-instructions li { margin-bottom: 0.6rem; }
+.lr-instructions b { color: var(--text); }
+
+/* chips: start / end / route */
+.lr-chip { display: inline-flex; align-items: center; gap: 0.4rem; border-radius: 6px; padding: 0.3rem 0.7rem; font-weight: 600; font-size: 0.9rem; }
+.lr-chip .dot { width: 8px; height: 8px; border-radius: 999px; }
+.lr-chip.start { background: var(--green-soft); color: var(--green-dark); border: 1px solid #bcd9c5; }
+.lr-chip.start .dot { background: var(--good); }
+.lr-chip.end { background: #f7e8e7; color: #8a211b; border: 1px solid #e3b5b2; }
+.lr-chip.end .dot { background: var(--bad); }
+.lr-route-pill { border: 1px solid var(--line); background: var(--surface-2); border-radius: 6px; padding: 0.2rem 0.55rem; font-size: 0.85rem; color: var(--text); }
+
+/* timer + progress */
+.lr-timer { display: grid; place-items: center; width: 60px; height: 60px; border: 1px solid var(--line); border-radius: 8px; background: #fff; font-size: 1.5rem; font-weight: 700; color: var(--text); }
+.lr-timer.low { border-color: #e3b5b2; background: #f7e8e7; color: var(--bad); }
+.progress { height: 0.5rem; background: var(--surface-2); border-radius: 999px; }
+.progress-bar { background: var(--green) !important; }
+.progress-bar.bg-danger { background: var(--bad) !important; }
+
+/* coins / score */
+.lr-coin-box { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 0.5rem 1.1rem; text-align: center; }
+.lr-coin-box .k { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+.lr-coin-box .v { font-size: 1.7rem; font-weight: 800; color: var(--text); }
+.lr-score-big { font-weight: 800; font-size: 4.5rem; line-height: 1; color: var(--green); }
+
+/* event cards */
+.event-card { border: 1px solid var(--line); border-radius: 8px !important; margin-bottom: 8px; background: #fff; }
+.event-card.positive { border-color: #bcd9c5; background: var(--green-soft); }
+.event-card.negative { border-color: #e3b5b2; background: #f7e8e7; }
+
+/* tables */
+.table { color: var(--text); border-color: var(--line); }
+.table > :not(caption) > * > * { background: transparent; color: var(--text); border-color: var(--line); }
+.table thead th { text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.06em; color: var(--muted); }
+.table-hover > tbody > tr:hover > * { background: var(--surface-2); }
+
+/* alerts */
+.alert { border-radius: 8px; }
+.alert-danger { background: #f7e8e7; color: #8a211b; border: 1px solid #e3b5b2; }
+
+/* metro map panel (light) */
+.metro-wrap { position: relative; overflow: hidden; border-radius: 8px; background: #fff; border: 1px solid var(--line); }
+.metro-svg { width: 100%; height: auto; display: block; max-height: 66vh; }
+.metro-svg.compact { max-height: 60vh; }
+
+/* segment list (planning) */
+.lr-seg-grid { display: grid; grid-template-columns: 1fr; gap: 0.4rem; }
+.lr-seg-chip { display: flex; align-items: center; justify-content: space-between; gap: 0.4rem; border: 1px solid var(--line); background: #fff; border-radius: 6px; padding: 0.6rem 0.8rem; font-size: 0.95rem; cursor: pointer; text-align: left; color: var(--text); }
+.lr-seg-chip:hover:not(:disabled) { border-color: var(--green); background: var(--green-soft); }
+.lr-seg-chip:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* nav spacing */
+.navbar .navbar-nav { gap: 0.4rem; }

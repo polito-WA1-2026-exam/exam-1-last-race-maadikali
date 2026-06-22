@@ -1,138 +1,147 @@
-// The DAO layer loads therows, this module turns them into a graph and validates routes)
- 
-/**
- * @param {Array} stations      [{id, name}]
- * @param {Array} lines         [{id, name, color}]
- * @param {Array} lineStations  [{line_id, station_id, position}] ordered
- * Returns { stations, lines, lineStops, segments, segmentLines, adj, interchanges }
- */
 export function buildGraph(stations, lines, lineStations) {
-  const lineStops = new Map();      // lineId -> [stationId,...] in order
-  const stationLines = new Map();   // stationId -> Set(lineId)
-  for (const s of stations) stationLines.set(s.id, new Set());
-  for (const l of lines) lineStops.set(l.id, []);
 
-  for (const row of lineStations) {
-    lineStops.get(row.line_id).push(row.station_id);
-    stationLines.get(row.station_id).add(row.line_id);
-  }
+  // 1. group the stations of each line, keeping their order
+  const lineStops = {};                       // lineId -> [stationId, stationId, ...]
+  for (const line of lines) lineStops[line.id] = [];
+  for (const row of lineStations) lineStops[row.line_id].push(row.station_id);
 
-  // Undirected, canonical segments "a-b" with a < b.
-  const segMap = new Map();
-  const adj = new Map();
-  for (const s of stations) adj.set(s.id, new Map());
-
-  for (const [lineId, stops] of lineStops.entries()) {
+  // 2. make the segments. A segment is just two stations that are next to each
+  //    other on a line. Each segment remembers which line it belongs to.
+  const segments = [];                        // [{id, a, b, lineId}]
+  const segmentById = {};                     // "a-b" -> the segment
+  for (const lineId of Object.keys(lineStops)) {
+    const stops = lineStops[lineId];
     for (let i = 0; i < stops.length - 1; i++) {
-      const x = stops[i], y = stops[i + 1];
-      const a = Math.min(x, y), b = Math.max(x, y);
-      const key = `${a}-${b}`;
-      if (!segMap.has(key)) segMap.set(key, { id: key, a, b, lines: new Set() });
-      segMap.get(key).lines.add(lineId);
-      if (!adj.get(x).has(y)) adj.get(x).set(y, new Set());
-      if (!adj.get(y).has(x)) adj.get(y).set(x, new Set());
-      adj.get(x).get(y).add(lineId);
-      adj.get(y).get(x).add(lineId);
+      const first = stops[i];
+      const second = stops[i + 1];
+      const a = Math.min(first, second);      // put the smaller id first, so the
+      const b = Math.max(first, second);      // segment always has the same name
+      const id = a + "-" + b;
+      if (!segmentById[id]) {
+        const seg = { id, a, b, lineId: Number(lineId) };
+        segmentById[id] = seg;
+        segments.push(seg);
+      }
     }
   }
 
-  const segments = [...segMap.values()].map((s) => ({ id: s.id, a: s.a, b: s.b }));
-  const segmentLines = new Map([...segMap.values()].map((s) => [s.id, s.lines]));
-
+  // 3. interchanges are stations that belong to more than one line
+  const linesPerStation = {};                 // stationId -> how many lines pass it
+  for (const row of lineStations) {
+    linesPerStation[row.station_id] = (linesPerStation[row.station_id] || 0) + 1;
+  }
   const interchanges = new Set();
-  for (const [sid, set] of stationLines.entries()) {
-    if (set.size > 1) interchanges.add(sid);
+  for (const stationId of Object.keys(linesPerStation)) {
+    if (linesPerStation[stationId] > 1) interchanges.add(Number(stationId));
   }
 
-  return { stations, lines, lineStops, segments, segmentLines, adj, interchanges };
+  // 4. neighbours: for each station, the list of stations directly connected to it.
+  //    (used later to measure the distance between two stations)
+  const neighbours = {};                      // stationId -> [stationId, ...]
+  for (const s of stations) neighbours[s.id] = [];
+  for (const seg of segments) {
+    neighbours[seg.a].push(seg.b);
+    neighbours[seg.b].push(seg.a);
+  }
+
+  return { stations, lines, lineStops, segments, segmentById, interchanges, neighbours };
 }
 
-//BFS shortest path length (edges) between two stations; Infinity if unreachable.
-export function shortestPathLen(adj, src, dst) {
-  if (src === dst) return 0;
-  const queue = [src];
-  const dist = new Map([[src, 0]]);
-  while (queue.length) {
-    const u = queue.shift();
-    for (const v of adj.get(u).keys()) {
-      if (!dist.has(v)) {
-        dist.set(v, dist.get(u) + 1);
-        if (v === dst) return dist.get(v);
-        queue.push(v);
+// Find the shortest number of segments between two stations, using BFS.
+// BFS visits stations level by level, so the first time we reach the end station
+// we know it is the shortest distance. Returns Infinity if they are not connected.
+export function shortestPathLen(neighbours, start, end) {
+  if (start === end) return 0;
+  const queue = [start];
+  const distance = {};                        // stationId -> distance from start
+  distance[start] = 0;
+  while (queue.length > 0) {
+    const station = queue.shift();
+    for (const next of neighbours[station]) {
+      if (distance[next] === undefined) {     // not visited yet
+        distance[next] = distance[station] + 1;
+        if (next === end) return distance[next];
+        queue.push(next);
       }
     }
   }
   return Infinity;
 }
 
-//Picks a random (start, end) pair at least 3 segments apart
+// Pick a random start and end station that are at least 3 segments apart.
 export function pickEndpoints(net) {
-  const ids = net.stations.map((s) => s.id);
+  const ids = net.stations.map(s => s.id);
   for (let tries = 0; tries < 500; tries++) {
-    const a = ids[Math.floor(Math.random() * ids.length)];
-    const b = ids[Math.floor(Math.random() * ids.length)];
-    if (a === b) continue;
-    if (shortestPathLen(net.adj, a, b) >= 3) return { start: a, end: b };
+    const start = ids[Math.floor(Math.random() * ids.length)];
+    const end = ids[Math.floor(Math.random() * ids.length)];
+    if (start === end) continue;
+    if (shortestPathLen(net.neighbours, start, end) >= 3) {
+      return { start, end };
+    }
   }
-  return { start: ids[0], end: ids[ids.length - 1] }; // deterministic fallback
+  // fallback, just in case (should not normally happen)
+  return { start: ids[0], end: ids[ids.length - 1] };
 }
 
-//Validates an ordered list of segment ids submitted by the player.
-//Returns { valid, reason?, orderedStations? }.
-//Starts at start, ends at end, segments are connected and never reused,
-//and a line change (segments share no common line) is only allowed at an interchange
-
+// Check the route the player built. It is a list of segment ids in travel order.
+// Returns { valid: true, orderedStations } or { valid: false, reason }.
 export function validateRoute(net, startId, endId, segmentIds) {
-  if (!Array.isArray(segmentIds) || segmentIds.length === 0)
-    return { valid: false, reason: "empty route" };
 
-  const seen = new Set();
-  for (const id of segmentIds) {
-    if (seen.has(id)) return { valid: false, reason: "segment reused" };
-    seen.add(id);
+  // must pick at least one segment
+  if (!segmentIds || segmentIds.length === 0) {
+    return { valid: false, reason: "empty route" };
   }
 
+  // a segment cannot be used more than once
+  const used = new Set();
+  for (const id of segmentIds) {
+    if (used.has(id)) return { valid: false, reason: "segment reused" };
+    used.add(id);
+  }
+
+  // find each chosen segment in the network
   const segs = [];
   for (const id of segmentIds) {
-    const lineSet = net.segmentLines.get(id);
-    if (!lineSet) return { valid: false, reason: `unknown segment ${id}` };
-    const [a, b] = id.split("-").map(Number);
-    segs.push({ id, a, b, lines: lineSet });
+    const seg = net.segmentById[id];
+    if (!seg) return { valid: false, reason: "unknown segment" };
+    segs.push(seg);
   }
 
-  const orderedStations = [];
-  let current;
-  if (segs[0].a === startId) current = segs[0].a;
-  else if (segs[0].b === startId) current = segs[0].b;
-  else return { valid: false, reason: "route does not start at the assigned station" };
+  // the route must start at the assigned start station
+  let current = startId;
+  if (segs[0].a !== current && segs[0].b !== current) {
+    return { valid: false, reason: "route does not start at the assigned station" };
+  }
 
-  orderedStations.push(current);
-  let activeLines = new Set(segs[0].lines);
-  let next = segs[0].a === current ? segs[0].b : segs[0].a;
-  orderedStations.push(next);
-  current = next;
+  const orderedStations = [current];          // the stations we pass, in order
+  let currentLine = null;                     // the line we are travelling on now
 
-  for (let i = 1; i < segs.length; i++) {
-    const s = segs[i];
-    if (s.a !== current && s.b !== current)
+  // walk through the segments one by one
+  for (const seg of segs) {
+
+    // the segment must touch the station we are standing on
+    if (seg.a !== current && seg.b !== current) {
       return { valid: false, reason: "segments not connected" };
-
-    const intersection = new Set([...activeLines].filter((l) => s.lines.has(l)));
-    if (intersection.size === 0) {
-      // a line change happens at `current` -> must be an interchange
-      if (!net.interchanges.has(current))
-        return { valid: false, reason: "line change only allowed at an interchange station" };
-      activeLines = new Set(s.lines);
-    } else {
-      activeLines = intersection;
     }
-    next = s.a === current ? s.b : s.a;
-    orderedStations.push(next);
-    current = next;
+
+    // if this segment is on a different line, we are changing line,
+    // which is only allowed at an interchange station
+    if (currentLine !== null && seg.lineId !== currentLine) {
+      if (!net.interchanges.has(current)) {
+        return { valid: false, reason: "line change only allowed at an interchange station" };
+      }
+    }
+    currentLine = seg.lineId;
+
+    // move to the other end of the segment
+    current = (seg.a === current) ? seg.b : seg.a;
+    orderedStations.push(current);
   }
 
-  if (current !== endId)
+  // the route must end at the assigned end station
+  if (current !== endId) {
     return { valid: false, reason: "route does not end at the assigned station" };
+  }
 
   return { valid: true, orderedStations };
 }

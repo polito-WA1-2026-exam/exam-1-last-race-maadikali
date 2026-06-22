@@ -11,32 +11,32 @@ const db = new sqlite3.Database(FILE);
 
 // 4 metro lines (name + colour)
 const LINES = [
-  { name: "Orange Line", color: "#F39C12" },
-  { name: "Blue Line",   color: "#2980B9" },
-  { name: "Green Line",  color: "#27AE60" },
-  { name: "Pink Line",   color: "#EC4899" },
+  { name: "Orange Line", color: "#E8740C" },
+  { name: "Blue Line",   color: "#1565C0" },
+  { name: "Brown Line",  color: "#6D4C41" },
+  { name: "Pink Line",   color: "#C2185B" },
 ];
 
 // Each line's stops in order (this order is what defines the segments)
 const LINE_STOPS = {
   "Orange Line": ["Keruen", "Talan Towers", "Altyn Dala", "Zhetysu", "Dauir"],
   "Blue Line":   ["Ortalyk", "Jana Kala", "Altyn Dala", "Syganak", "Zhibek Zholy"],
-  "Green Line":  ["Alpamys", "Mangilik Yel", "Dauir", "Barys Arena", "Nurly Olke"],
+  "Brown Line":  ["Alpamys", "Mangilik Yel", "Dauir", "Barys Arena", "Nurly Olke"],
   "Pink Line":   ["Turan", "Esil Plaza", "Syganak", "Galamat Sayabak", "Barys Arena"],
 };
 
 // 10 random events (description + effect, each effect is between -4 and +4)
 const EVENTS = [
-  { description: "Dombra busker fills the carriage with a kuy", effect: 2 },
-  { description: "Elder shares warm shelpek for the road",      effect: 1 },
-  { description: "Steppe wind delays the doors at Saryarka",    effect: -1 },
-  { description: "Buran snowstorm freezes the track switches",  effect: -4 },
-  { description: "Turnstile swallows your transit card",        effect: -2 },
-  { description: "Nauryz parade hands out free kozhe",          effect: 4 },
-  { description: "A tenge note flutters onto the empty seat",   effect: 3 },
+  { description: "A street musician with dombra is playing near the station", effect: 2 },
+  { description: "Someone offers you a shelpek while you wait",      effect: 1 },
+  { description: "The train is held for a few extra minutes",    effect: -1 },
+  { description: "Strike causes delays across the network",  effect: -4 },
+  { description: "Your travel card doesn't scan properly",        effect: -2 },
+  { description: "A local festival is happening outside the station",          effect: 4 },
+  { description: "You find 1000 tenge on a seat",   effect: 3 },
   { description: "Lost in the bazaar crowd near Barys Arena",   effect: -3 },
-  { description: "Conductor waves you through with a nod",      effect: 0 },
-  { description: "Wrong platform during the Esil rush hour",    effect: -2 },
+  { description: "A staff member helps you find the right platform",      effect: 0 },
+  { description: "Wrong platform during the Astana rush hour",    effect: -2 },
 ];
 
 // 3 registered users (plain passwords here are hashed before storing)

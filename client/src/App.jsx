@@ -1,122 +1,45 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './AuthContext.jsx';
+import NavHeader from './components/NavHeader.jsx';
+import HomePage from './pages/HomePage.jsx';
+import LoginPage from './pages/LoginPage.jsx';
+import PlayPage from './pages/PlayPage.jsx';
+import RankingPage from './pages/RankingPage.jsx';
+import NotFoundPage from './pages/NotFoundPage.jsx';
+import { Container, Spinner } from 'react-bootstrap';
 
-function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+// only renders children if logged in
+function RequireAuth({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return <CenterSpinner />;          // wait while the session is being checked
+  if (!user) return <Navigate to="/login" replace />;  // not logged in then redirect to login
+  return children;
 }
 
-export default App
+// small centered loading spinner
+function CenterSpinner() {
+  return (
+    <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '50vh' }}>
+      <Spinner animation="border" />
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    // AuthProvider makes the logged-in user available to the whole app
+    <AuthProvider>
+      <NavHeader />
+      <Container className="py-4">
+        {/* all the app routes */}
+        <Routes>
+          <Route path="/" element={<HomePage />} />              {/* public home / instructions */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/play" element={<RequireAuth><PlayPage /></RequireAuth>} />        {/* protected */}
+          <Route path="/ranking" element={<RequireAuth><RankingPage /></RequireAuth>} />  {/* protected */}
+          <Route path="*" element={<NotFoundPage />} />          {/* anything else */}
+        </Routes>
+      </Container>
+    </AuthProvider>
+  );
+}

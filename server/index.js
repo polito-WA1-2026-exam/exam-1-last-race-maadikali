@@ -50,11 +50,10 @@ const errorFormatter = ({ msg }) => msg;
 
 // Load the whole network and build the in-memory graph
 async function loadNetwork() {
-  const [stations, lines, lineStations] = await Promise.all([
-    listStations(),
-    listLines(),
-    listLineStations(),
-  ]);
+  // read the three tables, then build the network from them
+  const stations = await listStations();
+  const lines = await listLines();
+  const lineStations = await listLineStations();
   return buildGraph(stations, lines, lineStations);
 }
 
@@ -102,7 +101,7 @@ app.get("/api/network/full", isLoggedIn, async (req, res) => {
         id: l.id,
         name: l.name,
         color: l.color,
-        stops: net.lineStops.get(l.id),
+        stops: net.lineStops[l.id],
       })),
       interchanges: [...net.interchanges],
     });
@@ -111,16 +110,13 @@ app.get("/api/network/full", isLoggedIn, async (req, res) => {
   }
 });
 
-// GET /api/network/segments  — Planning phase: stations + segments only, NO line info, shuffled
+// GET /api/network/segments  — Planning phase: stations + segments only, NO line info
 app.get("/api/network/segments", isLoggedIn, async (req, res) => {
   try {
     const net = await loadNetwork();
     const segs = [...net.segments];
-    // Fisher-Yates shuffle so the client cannot infer line membership from order.
-    for (let i = segs.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [segs[i], segs[j]] = [segs[j], segs[i]];
-    }
+    // mix up the order so the player cannot tell which line a segment is on
+    segs.sort(() => Math.random() - 0.5);
     res.json({
       stations: net.stations,
       segments: segs.map((s) => ({ id: s.id, a: s.a, b: s.b })),
